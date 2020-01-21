@@ -1,4 +1,8 @@
-import {createLocalVue, mount} from '@vue/test-utils'
+import {
+  createLocalVue,
+  mount as vtuMount,
+  shallowMount as vtuShallowMount,
+} from '@vue/test-utils'
 
 import {
   getQueriesForElement,
@@ -9,7 +13,8 @@ import {
 
 const mountedWrappers = new Set()
 
-function render(
+function _render(
+  m = vtuMount,
   TestComponent,
   {
     store = null,
@@ -52,7 +57,7 @@ function render(
     delete mountOptions.props
   }
 
-  const wrapper = mount(TestComponent, {
+  const wrapper = m(TestComponent, {
     localVue,
     router,
     store: vuexStore,
@@ -66,6 +71,7 @@ function render(
   container.appendChild(wrapper.element)
 
   return {
+    wrapper,
     container,
     baseElement,
     debug: (el = baseElement) =>
@@ -81,6 +87,16 @@ function render(
     ...getQueriesForElement(baseElement),
   }
 }
+
+function mount(TestComponent, config = {}, configurationCb) {
+  return _render(vtuMount, TestComponent, config, configurationCb)
+}
+
+function shallowMount(TestComponent, config = {}, configurationCb) {
+  return _render(vtuShallowMount, TestComponent, config, configurationCb)
+}
+
+const render = mount
 
 function cleanup() {
   mountedWrappers.forEach(cleanupAtWrapper)
@@ -179,4 +195,4 @@ if (typeof afterEach === 'function' && !process.env.VTL_SKIP_AUTO_CLEANUP) {
 }
 
 export * from '@testing-library/dom'
-export {cleanup, render, fireEvent}
+export { cleanup, render, fireEvent, mount, shallowMount }
