@@ -1,28 +1,21 @@
-module.exports = {
-  moduleDirectories: [
-    'node_modules',
-    'src'
-  ],
-  moduleFileExtensions: [
-    'js',
-    'vue'
-  ],
+const merge = require('lodash.merge')
+const config = require('kcd-scripts/jest')
+
+module.exports = merge(config, {
+  testEnvironment: 'jsdom',
+  moduleFileExtensions: ['js', 'vue'],
+  moduleNameMapper: {
+    '@testing-library/vue': '<rootDir>/src/vue-testing-library.js',
+  },
   coverageDirectory: './coverage',
-  collectCoverageFrom: [
-    '**/src/**/*.js',
-    '!**/tests/__tests__/**',
-    '!**/node_modules/**'
-  ],
-  testPathIgnorePatterns: [
-    '/node_modules/',
-    '<rootDir>/npm/',
-    '<rootDir>/tests/__tests__/components/'
-  ],
+  collectCoverageFrom: ['**/src/**/*.js', '!**/src/__tests__/**'],
   transform: {
     '^.+\\.js$': '<rootDir>/node_modules/babel-jest',
-    '.*\\.(vue)$': '<rootDir>/node_modules/vue-jest'
+    '.*\\.(vue)$': '<rootDir>/node_modules/vue-jest',
   },
-  snapshotSerializers: [
-    '<rootDir>/node_modules/jest-serializer-vue'
-  ]
-}
+  snapshotSerializers: ['<rootDir>/node_modules/jest-serializer-vue'],
+  testPathIgnorePatterns: [
+    '<rootDir>/node_modules',
+    '<rootDir>/src/__tests__/components',
+  ],
+})

@@ -1,162 +1,199 @@
 <div align="center">
-<h1>vue-testing-library</h1>
+<h1>Vue Testing Library</h1>
 
-<p>Lightweight adapter allowing <a href="https://github.com/kentcdodds/dom-testing-library/">dom-testing-library</a> to be used to test <a href="https://github.com/vuejs/vue">Vue.js</a> components built on top of <a href="https://github.com/vuejs/vue-test-utils">@vue/test-utils</a></p>
+<br />
+
+<a href="https://www.joypixels.com/emoji/1F98E">
+  <img
+    height="80"
+    width="80"
+    alt="lizard"
+    src="https://raw.githubusercontent.com/testing-library/vue-testing-library/master/lizard.png"
+  />
+</a>
+
+<p>Simple and complete Vue.js testing utilities that encourage good testing practices.</p>
+
+<p>Vue Testing Library is a lightweight adapter built on top of <a href="https://github.com/testing-library/dom-testing-library/">DOM Testing Library</a> and <a href="https://github.com/vuejs/vue-test-utils">@vue/test-utils</a>.</p>
+
+<br />
+
+[**Read the docs**][docs] | [Edit the docs][docs-edit]
+
+<br />
 
 </div>
 
 <hr />
 
-[![Build Status](https://travis-ci.org/dfcook/vue-testing-library.svg?branch=master)](https://travis-ci.org/dfcook/vue-testing-library)&nbsp;&nbsp;
-[![Coverage Status](https://coveralls.io/repos/github/dfcook/vue-testing-library/badge.svg?branch=master)](https://coveralls.io/github/dfcook/vue-testing-library?branch=master)&nbsp;&nbsp;
-[![GitHub version](https://badge.fury.io/gh/dfcook%2Fvue-testing-library.svg)](https://badge.fury.io/gh/dfcook%2Fvue-testing-library)
+<!-- prettier-ignore-start -->
+[![Build Status][build-badge]][build]
+[![Coverage Status][coverage-badge]][coverage]
+[![GitHub version][github-badge]][github]
+[![npm version][npm-badge]][npm]
 
-[![npm version](https://badge.fury.io/js/vue-testing-library.svg)](https://badge.fury.io/js/vue-testing-library)&nbsp;&nbsp;
-[![license](https://img.shields.io/github/license/dfcook/vue-testing-library.svg)](https://img.shields.io/github/license/dfcook/vue-testing-library)
+[![MIT License][license-badge]][license]
+[![Join the community on Spectrum][spectrum-badge]][spectrum]
+<!-- prettier-ignore-end -->
 
-## This library
+<h2>Table of Contents</h2>
 
-The `vue-testing-library` is a an adapter that enables Vue testing using the framework-agnostic DOM testing library `dom-testing-library`
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-* [Installation](#installation)
-* [Usage](#usage)
-  * [`render`](#render)
-  * [`fireEvent`](#fireEvent)
-  * [`wait`](#wait)
-* [Examples](#examples)
-* [LICENSE](#license)
+- [Installation](#installation)
+- [A simple example](#a-simple-example)
+  - [More examples](#more-examples)
+- [Docs](#docs)
+- [Typings](#typings)
+- [ESLint](#eslint-support)
+- [License](#license)
+- [Contributors](#contributors)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## Installation
 
-This module is distributed via npm which is bundled with node and
-should be installed as one of your project's `devDependencies`:
+This module is distributed via `npm` and should be installed as one of your
+project's `devDependencies`:
 
 ```
-npm install --save-dev vue-testing-library
-
+npm install --save-dev @testing-library/vue
 ```
 
-## Usage
+This library has `peerDependencies` listings for `Vue` and
+`vue-template-compiler`.
 
-```
-npm install --save-dev vue-testing-library
-                       jest
-                       vue-jest
-                       babel-jest
-                       babel-preset-env
-                       babel-plugin-transform-runtime
-```
+You may also be interested in installing `jest-dom` so you can use
+[the custom Jest matchers](https://github.com/testing-library/jest-dom#readme).
 
-```javascript
-// package.json
-  "scripts": {
-    "test": "jest"
-  }
+## A simple example
 
-  "jest": {
-    "moduleDirectories": [
-      "node_modules",
-      "src"
-    ],
-    "moduleFileExtensions": [
-      "js",
-      "vue"
-    ],
-    "testPathIgnorePatterns": [
-      "/node_modules/"
-    ],
-    "transform": {
-      "^.+\\.js$": "<rootDir>/node_modules/babel-jest",
-      ".*\\.(vue)$": "<rootDir>/node_modules/vue-jest"
-    }
-  }
-
-// .babelrc
-{
-  "presets": [
-    ["env", {
-      "modules": false,
-      "targets": {
-        "browsers": ["> 1%", "last 2 versions", "not ie <= 8"]
-      }
-    }]
-  ],
-  "plugins": [
-    "transform-runtime"
-  ],
-  "env": {
-    "test": {
-      "presets": ["env"]
-    }
-  }
-}
-
-// src/TestComponent.vue
+```html
+<!-- TestComponent.vue -->
 <template>
   <div>
-    <span data-testid="test1">Hello World</span>
+    <p>Times clicked: {{ count }}</p>
+    <button @click="increment">increment</button>
   </div>
 </template>
 
-// src/TestComponent.spec.js
-import 'jest-dom/extend-expect'
-import { render } from 'vue-testing-library'
-import TestComponent from './TestComponent'
-
-test('should render HelloWorld', () => {
-  const { queryByTestId } = render(TestComponent)
-  expect(queryByTestId('test1')).toHaveTextContent('Hello World')
-})
-
+<script>
+  export default {
+    data: () => ({
+      count: 0,
+    }),
+    methods: {
+      increment() {
+        this.count++
+      },
+    },
+  }
+</script>
 ```
 
-### render
+```js
+// TestComponent.spec.js
+import {render, fireEvent} from '@testing-library/vue'
+import TestComponent from './TestComponent.vue'
 
-The `render` function takes up to 3 parameters and returns an object with some helper methods
+test('increments value on click', async () => {
+  // The render method returns a collection of utilities to query the component.
+  const {getByText} = render(TestComponent)
 
-1. Component - the Vue component to be tested.
-2. RenderOptions - an object containing additional information to be passed to @vue/test-utils mount. This can be:
-* store - The object definition of a Vuex store, if present `render` will configure a Vuex store and pass to mount.
-* routes - A set of routes, if present render will configure VueRouter and pass to mount.
-All additional render options are passed to the vue-test-utils mount function in its options.
-3. configurationCb - A callback to be called passing the Vue instance when created, plus the store and router if specified. This allows 3rd party plugins to be installed prior to mount.
+  // getByText returns the first matching node for the provided text, and
+  // throws an error if no elements match or if more than one match is found.
+  getByText('Times clicked: 0')
 
-### fireEvent
+  // `button` is the actual DOM element.
+  const button = getByText('increment')
 
-Lightweight wrapper around DOM element events and methods. Will call wait, so can be awaited to allow effects to propagate.
+  // Dispatch a couple of native click events.
+  await fireEvent.click(button)
+  await fireEvent.click(button)
 
-### wait
+  getByText('Times clicked: 2')
+})
+```
 
-When in need to wait for non-deterministic periods of time you can use `wait`,
-to wait for your expectations to pass. The `wait` function is a small wrapper
-around the
-[`wait-for-expect`](https://github.com/TheBrainFamily/wait-for-expect) module.
+### More examples
 
-Waiting can be very important in Vue components, @vue/test-utils has succeeded in making the majority of updates happen
-synchronously however there are occasions when wait will allow the DOM to update. For example, see [`here`](https://github.com/dfcook/vue-testing-library/tree/master/tests/__tests__/validate-plugin.js)
+You'll find examples of testing with different situations and popular libraries
+in [the test directory][test-directory].
 
-## Examples
-
-You'll find examples of testing with different libraries in
-[the test directory](https://github.com/dfcook/vue-testing-library/tree/master/tests/__tests__).
 Some included are:
 
-* [`vuex`](https://github.com/dfcook/vue-testing-library/tree/master/tests/__tests__/vuex.js)
-* [`vue-router`](https://github.com/dfcook/vue-testing-library/tree/master/tests/__tests__/vue-router.js)
-* [`vee-validate`](https://github.com/dfcook/vue-testing-library/tree/master/tests/__tests__/validate-plugin.js)
+- [`vuex`][vuex-example]
+- [`vue-router`][vue-router-example]
+- [`vee-validate`][vee-validate-example]
+- [`vue-i18n`][vue-i18n-example]
+- [`vuetify`][vuetify-example]
 
-Feel free to contribute more!
+Feel free to contribute with more examples!
 
-## LICENSE
+## Docs
 
-MIT
+[**Read the docs**][docs] | [Edit the docs][docs-edit]
 
-## CONTRIBUTORS
+## Typings
 
-[![dfcook](https://avatars0.githubusercontent.com/u/10348212?v=3&s=200)](https://github.com/dfcook)
-[![eunjae-lee](https://avatars0.githubusercontent.com/u/499898?v=3&s=200)](https://github.com/eunjae-lee)
-[![tim-maguire](https://avatars0.githubusercontent.com/u/29452317?v=3&s=200)](https://github.com/tim-maguire)
-[![samdelacruz](https://avatars0.githubusercontent.com/u/2040007?v=3&s=200)](https://github.com/samdelacruz)
-[![ankitsinghaniyaz](https://avatars0.githubusercontent.com/u/11331989?v=3&s=200)](https://github.com/ankitsinghaniyaz)
-[![lindgr3n](https://avatars0.githubusercontent.com/u/24882614?v=3&s=200)](https://github.com/lindgr3n)
-[![kentcdodds](https://avatars0.githubusercontent.com/u/1500684?v=3&s=200)](https://github.com/kentcdodds)
+The TypeScript type definitions are in the
+[DefinitelyTyped repo][types]
+and bundled with Vue Testing Library.
+
+## ESLint support
+
+If you want to lint test files that use Vue Testing Library, you can use the official plugin: [eslint-plugin-testing-library](https://github.com/Belco90/eslint-plugin-testing-library).
+
+## License
+
+[MIT][license]
+
+## Contributors
+
+[![dfcook](https://avatars0.githubusercontent.com/u/10348212?v=3&s=120)](https://github.com/dfcook)
+[![afontcu](https://avatars3.githubusercontent.com/u/9197791?v=3&s=120)](https://github.com/afontcu)
+[![eunjae-lee](https://avatars0.githubusercontent.com/u/499898?v=3&s=120)](https://github.com/eunjae-lee)
+[![tim-maguire](https://avatars0.githubusercontent.com/u/29452317?v=3&s=120)](https://github.com/tim-maguire)
+[![samdelacruz](https://avatars0.githubusercontent.com/u/2040007?v=3&s=120)](https://github.com/samdelacruz)
+[![ankitsinghaniyaz](https://avatars0.githubusercontent.com/u/11331989?v=3&s=120)](https://github.com/ankitsinghaniyaz)
+[![lindgr3n](https://avatars0.githubusercontent.com/u/24882614?v=3&s=120)](https://github.com/lindgr3n)
+[![kentcdodds](https://avatars0.githubusercontent.com/u/1500684?v=3&s=120)](https://github.com/kentcdodds)
+[![brennj](https://avatars2.githubusercontent.com/u/29227924?v=3&s=120)](https://github.com/brennj)
+[![makeupsomething](https://avatars2.githubusercontent.com/u/7676733?v=3&s=120)](https://github.com/makeupsomething)
+[![mb200](https://avatars2.githubusercontent.com/u/22549525?v=3&s=120)](https://github.com/mb200)
+[![Oluwasetemi](https://avatars2.githubusercontent.com/u/10030028?v=3&s=120)](https://github.com/Oluwasetemi)
+[![cimbul](https://avatars2.githubusercontent.com/u/927923?v=3&s=120)](https://github.com/cimbul)
+[![alexkrolick](https://avatars2.githubusercontent.com/u/1571667?v=3&s=120)](https://github.com/alexkrolick)
+[![edufarre](https://avatars2.githubusercontent.com/u/25011566?v=3&s=120)](https://github.com/edufarre)
+[![SandraDml](https://avatars2.githubusercontent.com/u/5694169?v=3&s=120)](https://github.com/SandraDml)
+[![arnaublanche](https://avatars2.githubusercontent.com/u/24812315?v=3&s=120)](https://github.com/arnaublanche)
+[![NoelDeMartin](https://avatars2.githubusercontent.com/u/1517677?v=3&s=120)](https://github.com/NoelDeMartin)
+[![chiptus](https://avatars2.githubusercontent.com/u/1381655?v=3&s=120)](https://github.com/chiptus)
+[![bennettdams](https://avatars2.githubusercontent.com/u/29319414?v=3&s=120)](https://github.com/bennettdams)
+
+<!-- prettier-ignore-start -->
+[build-badge]: https://travis-ci.org/testing-library/vue-testing-library.svg?branch=master
+[build]: https://travis-ci.org/testing-library/vue-testing-library
+[spectrum-badge]: https://withspectrum.github.io/badge/badge.svg
+[spectrum]: https://spectrum.chat/testing-library
+[coverage-badge]: https://img.shields.io/codecov/c/github/testing-library/vue-testing-library.svg
+[coverage]: https://codecov.io/github/testing-library/vue-testing-library
+[github-badge]: https://badge.fury.io/gh/testing-library%2Fvue-testing-library.svg
+[github]: https://badge.fury.io/gh/testing-library%2Fvue-testing-library
+[npm-badge]: https://badge.fury.io/js/%40testing-library%2Fvue.svg
+[npm]: https://badge.fury.io/js/%40testing-library%2Fvue
+[license-badge]: https://img.shields.io/github/license/testing-library/vue-testing-library.svg
+[license]: https://github.com/testing-library/vue-testing-library/blob/master/LICENSE
+[types]: https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/testing-library__vue
+
+[docs]: https://testing-library.com/vue
+[docs-edit]: https://github.com/testing-library/testing-library-docs
+
+[test-directory]: https://github.com/testing-library/vue-testing-library/blob/master/src/__tests__
+[vuex-example]: https://github.com/testing-library/vue-testing-library/blob/master/src/__tests__/vuex.js
+[vue-router-example]: https://github.com/testing-library/vue-testing-library/blob/master/src/__tests__/vue-router.js
+[vee-validate-example]: https://github.com/testing-library/vue-testing-library/blob/master/src/__tests__/validate-plugin.js
+[vue-i18n-example]: https://github.com/testing-library/vue-testing-library/blob/master/src/__tests__/vueI18n.js
+[vuetify-example]: https://github.com/testing-library/vue-testing-library/blob/master/src/__tests__/vuetify.js
+<!-- prettier-ignore-end -->

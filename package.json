@@ -1,21 +1,28 @@
 {
-  "name": "vue-testing-library",
-  "version": "0.16.0",
+  "name": "@testing-library/vue",
+  "version": "0.0.0-semantically-released",
   "description": "Simple and complete Vue DOM testing utilities that encourage good testing practices.",
-  "main": "npm/index.js",
+  "main": "dist/vue-testing-library.js",
   "scripts": {
-    "lint": "eslint --ext .js,.vue .",
-    "lint:fix": "eslint --ext .js,.vue . --fix",
-    "test": "jest --coverage",
-    "coveralls": "cat ./coverage/lcov.info | ./node_modules/.bin/coveralls",
-    "version": "babel src --out-dir npm"
+    "format": "kcd-scripts format",
+    "build": "kcd-scripts build",
+    "lint": "kcd-scripts lint",
+    "test": "kcd-scripts test",
+    "test:update": "npm test -- --updateSnapshot --coverage",
+    "validate": "kcd-scripts validate",
+    "setup": "npm install && npm run validate -s"
   },
   "files": [
-    "npm"
+    "dist",
+    "cleanup-after-each.js"
   ],
+  "homepage": "https://github.com/testing-library/vue-testing-library#readme",
+  "bugs": {
+    "url": "https://github.com/testing-library/vue-testing-library/issues"
+  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/dfcook/vue-testing-library"
+    "url": "https://github.com/testing-library/vue-testing-library.git"
   },
   "keywords": [
     "vue.js",
@@ -30,36 +37,35 @@
   "author": "Daniel Cook",
   "license": "MIT",
   "dependencies": {
-    "@vue/test-utils": "^1.0.0-beta.29",
-    "dom-testing-library": "^3.18.2",
+    "@babel/runtime": "^7.5.5",
+    "@testing-library/dom": "^6.0.0",
+    "@types/testing-library__vue": "*",
+    "@vue/test-utils": "^1.0.0-beta.29"
+  },
+  "devDependencies": {
+    "@babel/plugin-transform-runtime": "^7.5.5",
+    "@testing-library/jest-dom": "^4.0.0",
+    "axios": "^0.19.0",
+    "eslint-plugin-vue": "^5.2.3",
+    "jest-serializer-vue": "^2.0.2",
+    "kcd-scripts": "^1.7.0",
+    "lodash.merge": "^4.6.2",
+    "vee-validate": "^2.2.13",
+    "vue": "^2.6.10",
+    "vue-i18n": "^8.13.0",
+    "vue-jest": "^3.0.4",
+    "vue-router": "^3.1.2",
+    "vue-template-compiler": "^2.6.10",
+    "vuetify": "^2.0.19",
+    "vuex": "^3.1.1"
+  },
+  "peerDependencies": {
     "vue": "^2.6.10",
     "vue-template-compiler": "^2.6.10"
   },
-  "devDependencies": {
-    "@babel/cli": "^7.2.3",
-    "@babel/core": "^7.4.0",
-    "@babel/plugin-proposal-object-rest-spread": "^7.4.0",
-    "@babel/plugin-transform-runtime": "^7.4.0",
-    "@babel/preset-env": "^7.4.2",
-    "axios": "^0.18.0",
-    "babel-core": "^7.0.0-bridge.0",
-    "babel-eslint": "^10.0.1",
-    "babel-jest": "^24.5.0",
-    "coveralls": "^3.0.3",
-    "eslint": "^5.15.3",
-    "eslint-config-standard": "^12.0.0",
-    "eslint-plugin-import": "^2.16.0",
-    "eslint-plugin-node": "^8.0.1",
-    "eslint-plugin-promise": "^4.0.1",
-    "eslint-plugin-standard": "^4.0.0",
-    "eslint-plugin-vue": "^5.2.2",
-    "jest": "^24.5.0",
-    "jest-dom": "^3.1.3",
-    "jest-in-case": "^1.0.2",
-    "jest-serializer-vue": "^2.0.2",
-    "vee-validate": "^2.2.0",
-    "vue-jest": "^3.0.4",
-    "vue-router": "^3.0.2",
-    "vuex": "^3.1.0"
+  "husky": {
+    "hooks": {
+      "pre-commit": "kcd-scripts pre-commit"
+    }
   }
 }
